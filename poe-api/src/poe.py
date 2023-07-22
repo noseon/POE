@@ -288,18 +288,14 @@ class Client:
   def explore_bots(self, end_cursor=None, count=25):
     if not end_cursor:
       url = f'https://poe.com/_next/data/{self.next_data["buildId"]}/explore_bots.json'
-      r = request_with_retries(self.session.get, url).json()
-      if "payload" in r["pageProps"]:
-        key = "payload"
-        nodes = r["pageProps"]["payload"]["exploreBotsConnection"]["edges"]
-      else:
-        key = "data"
-        nodes = r["pageProps"]["data"]["exploreBotsConnection"]["edges"]
+      r = request_with_retries(self.session.get, url).json()  
+      data = r["pageProps"].get("payload") or r["pageProps"]["data"]
+      nodes = data["exploreBotsConnection"]["edges"]
       bots = [node["node"] for node in nodes]
       bots = bots[:count]
       return {
         "bots": bots,
-        "end_cursor": r["pageProps"][key]["exploreBotsConnection"]["pageInfo" ]["endCursor"],
+        "end_cursor": data["exploreBotsConnection"]["pageInfo" ]["endCursor"],
       }
 
     else:
